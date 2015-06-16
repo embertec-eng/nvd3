@@ -24,6 +24,7 @@ nv.models.multiBarHorizontal = function() {
         , showBarLabels = false
         , valuePadding = 60
         , valueFormat = d3.format(',.2f')
+        , minBarWidth = 1
         , delay = 1200
         , xDomain
         , yDomain
@@ -266,7 +267,7 @@ nv.models.multiBarHorizontal = function() {
                     })
                     .select('rect')
                     .attr('width', function(d,i) {
-                        return Math.abs(y(getY(d,i) + d.y0) - y(d.y0))
+                        return Math.max(Math.abs(y(getY(d,i) + d.y0) - y(d.y0)), minBarWidth) || minBarWidth
                     })
                     .attr('height', x.rangeBand() );
             else
@@ -284,7 +285,7 @@ nv.models.multiBarHorizontal = function() {
                     .select('rect')
                     .attr('height', x.rangeBand() / data.length )
                     .attr('width', function(d,i) {
-                        return Math.max(Math.abs(y(getY(d,i)) - y(0)),1)
+                        return Math.max(Math.abs(y(getY(d,i)) - y(0)), minBarWidth) || minBarWidth
                     });
 
             //store old scales for use in transitions on update
@@ -327,6 +328,7 @@ nv.models.multiBarHorizontal = function() {
         id:           {get: function(){return id;}, set: function(_){id=_;}},
         valueFormat:  {get: function(){return valueFormat;}, set: function(_){valueFormat=_;}},
         valuePadding: {get: function(){return valuePadding;}, set: function(_){valuePadding=_;}},
+        minBarWidth:  {get: function(){return minBarWidth;}, set: function(_){minBarWidth=_;}},
 
         // options that require extra logic in the setter
         margin: {get: function(){return margin;}, set: function(_){

@@ -28,6 +28,7 @@ nv.models.multiBar = function() {
         , xRange
         , yRange
         , groupSpacing = 0.1
+        , minBarHeight = 1
         , dispatch = d3.dispatch('chartClick', 'elementClick', 'elementDblClick', 'elementMouseover', 'elementMouseout', 'renderEnd')
         ;
 
@@ -258,7 +259,7 @@ nv.models.multiBar = function() {
                         return y((stacked ? d.y1 : 0));
                     })
                     .attr('height', function(d,i) {
-                        return Math.max(Math.abs(y(d.y + (stacked ? d.y0 : 0)) - y((stacked ? d.y0 : 0))),1);
+                        return Math.max(Math.abs(y(d.y + (stacked ? d.y0 : 0)) - y((stacked ? d.y0 : 0))), minBarHeight) || minBarHeight;
                     })
                     .attr('x', function(d,i) {
                         return stacked ? 0 : (d.series * x.rangeBand() / data.length )
@@ -278,7 +279,7 @@ nv.models.multiBar = function() {
                             y(getY(d,i)) || 0;
                     })
                     .attr('height', function(d,i) {
-                        return Math.max(Math.abs(y(getY(d,i)) - y(0)),1) || 0;
+                        return Math.max(Math.abs(y(getY(d,i)) - y(0)), minBarHeight) || minBarHeight;
                     });
 
             //store old scales for use in transitions on update
@@ -325,6 +326,7 @@ nv.models.multiBar = function() {
         id:          {get: function(){return id;}, set: function(_){id=_;}},
         hideable:    {get: function(){return hideable;}, set: function(_){hideable=_;}},
         groupSpacing:{get: function(){return groupSpacing;}, set: function(_){groupSpacing=_;}},
+        minBarHeight:{get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
 
         // options that require extra logic in the setter
         margin: {get: function(){return margin;}, set: function(_){

@@ -24,6 +24,14 @@ describe 'NVD3', ->
                 {label: 'Asia', value: 31}
                 {label: 'Africa', value: 13}
             ]
+        ,
+            key: 'Series 4'
+            values: [
+                {label: 'America'}
+                {label: 'Europe'}
+                {label: 'Asia'}
+                {label: 'Africa'}
+            ]
         ]
 
         options =
@@ -48,6 +56,7 @@ describe 'NVD3', ->
             tooltips: true
             tooltipContent: (key,x,y)-> "<h3>#{key}</h3>"
             noData: 'No Data Available'
+            minBarHeight: 0
             duration: 0
 
         builder = null
@@ -83,4 +92,8 @@ describe 'NVD3', ->
 
         it 'renders bars', ->
           bars = builder.$("g.nvd3.nv-multiBarWithLegend .nv-multibar .nv-bar")
-          bars.should.have.length 12
+          bars.should.have.length 16
+
+        it 'renders with specified minBarHeight', ->
+          minBars = builder.$("g.nvd3.nv-multiBarWithLegend .nv-multibar .nv-bar[height='0']")
+          minBars.should.have.length 4

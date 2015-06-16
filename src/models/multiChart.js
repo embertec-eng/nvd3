@@ -18,6 +18,7 @@ nv.models.multiChart = function() {
         x,
         y,
         noData = 'No Data Available.',
+        minBarHeight = 1,
         yDomain1,
         yDomain2,
         getX = function(d) { return d.x },
@@ -171,10 +172,12 @@ nv.models.multiChart = function() {
             bars1
                 .width(availableWidth)
                 .height(availableHeight)
+                .minBarHeight(minBarHeight)
                 .color(color_array.filter(function(d,i) { return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'bar'}));
             bars2
                 .width(availableWidth)
                 .height(availableHeight)
+                .minBarHeight(minBarHeight)
                 .color(color_array.filter(function(d,i) { return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'bar'}));
             stack1
                 .width(availableWidth)
@@ -401,14 +404,15 @@ nv.models.multiChart = function() {
 
     chart._options = Object.create({}, {
         // simple options, just get/set the necessary values
-        width:      {get: function(){return width;}, set: function(_){width=_;}},
-        height:     {get: function(){return height;}, set: function(_){height=_;}},
-        showLegend: {get: function(){return showLegend;}, set: function(_){showLegend=_;}},
-        yDomain1:      {get: function(){return yDomain1;}, set: function(_){yDomain1=_;}},
-        yDomain2:    {get: function(){return yDomain2;}, set: function(_){yDomain2=_;}},
-        tooltips:    {get: function(){return tooltips;}, set: function(_){tooltips=_;}},
-        tooltipContent:    {get: function(){return tooltip;}, set: function(_){tooltip=_;}},
-        noData:    {get: function(){return noData;}, set: function(_){noData=_;}},
+        width:          {get: function(){return width;}, set: function(_){width=_;}},
+        height:         {get: function(){return height;}, set: function(_){height=_;}},
+        showLegend:     {get: function(){return showLegend;}, set: function(_){showLegend=_;}},
+        yDomain1:       {get: function(){return yDomain1;}, set: function(_){yDomain1=_;}},
+        yDomain2:       {get: function(){return yDomain2;}, set: function(_){yDomain2=_;}},
+        tooltips:       {get: function(){return tooltips;}, set: function(_){tooltips=_;}},
+        tooltipContent: {get: function(){return tooltip;}, set: function(_){tooltip=_;}},
+        noData:         {get: function(){return noData;}, set: function(_){noData=_;}},
+        minBarHeight:   {get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
         interpolate:    {get: function(){return interpolate;}, set: function(_){interpolate=_;}},
 
         // options that require extra logic in the setter
