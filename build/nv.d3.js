@@ -1,4 +1,4 @@
-/* nvd3 version 1.7.1(https://github.com/novus/nvd3) 2015-02-08 */
+/* nvd3 version 1.7.1(https://github.com/novus/nvd3) 2015-06-16 */
 (function(){
 
 // set up main nv object on window
@@ -6283,6 +6283,7 @@ nv.models.multiBar = function() {
         , xRange
         , yRange
         , groupSpacing = 0.1
+        , minBarHeight = 1
         , dispatch = d3.dispatch('chartClick', 'elementClick', 'elementDblClick', 'elementMouseover', 'elementMouseout', 'renderEnd')
         ;
 
@@ -6513,7 +6514,7 @@ nv.models.multiBar = function() {
                         return y((stacked ? d.y1 : 0));
                     })
                     .attr('height', function(d,i) {
-                        return Math.max(Math.abs(y(d.y + (stacked ? d.y0 : 0)) - y((stacked ? d.y0 : 0))),1);
+                        return Math.max(Math.abs(y(d.y + (stacked ? d.y0 : 0)) - y((stacked ? d.y0 : 0))), minBarHeight) || minBarHeight;
                     })
                     .attr('x', function(d,i) {
                         return stacked ? 0 : (d.series * x.rangeBand() / data.length )
@@ -6533,7 +6534,7 @@ nv.models.multiBar = function() {
                             y(getY(d,i)) || 0;
                     })
                     .attr('height', function(d,i) {
-                        return Math.max(Math.abs(y(getY(d,i)) - y(0)),1) || 0;
+                        return Math.max(Math.abs(y(getY(d,i)) - y(0)), minBarHeight) || minBarHeight;
                     });
 
             //store old scales for use in transitions on update
@@ -6580,6 +6581,7 @@ nv.models.multiBar = function() {
         id:          {get: function(){return id;}, set: function(_){id=_;}},
         hideable:    {get: function(){return hideable;}, set: function(_){hideable=_;}},
         groupSpacing:{get: function(){return groupSpacing;}, set: function(_){groupSpacing=_;}},
+        minBarHeight:{get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
 
         // options that require extra logic in the setter
         margin: {get: function(){return margin;}, set: function(_){
@@ -7070,6 +7072,7 @@ nv.models.multiBarHorizontal = function() {
         , showBarLabels = false
         , valuePadding = 60
         , valueFormat = d3.format(',.2f')
+        , minBarWidth = 1
         , delay = 1200
         , xDomain
         , yDomain
@@ -7312,7 +7315,7 @@ nv.models.multiBarHorizontal = function() {
                     })
                     .select('rect')
                     .attr('width', function(d,i) {
-                        return Math.abs(y(getY(d,i) + d.y0) - y(d.y0))
+                        return Math.max(Math.abs(y(getY(d,i) + d.y0) - y(d.y0)), minBarWidth) || minBarWidth
                     })
                     .attr('height', x.rangeBand() );
             else
@@ -7330,7 +7333,7 @@ nv.models.multiBarHorizontal = function() {
                     .select('rect')
                     .attr('height', x.rangeBand() / data.length )
                     .attr('width', function(d,i) {
-                        return Math.max(Math.abs(y(getY(d,i)) - y(0)),1)
+                        return Math.max(Math.abs(y(getY(d,i)) - y(0)), minBarWidth) || minBarWidth
                     });
 
             //store old scales for use in transitions on update
@@ -7373,6 +7376,7 @@ nv.models.multiBarHorizontal = function() {
         id:           {get: function(){return id;}, set: function(_){id=_;}},
         valueFormat:  {get: function(){return valueFormat;}, set: function(_){valueFormat=_;}},
         valuePadding: {get: function(){return valuePadding;}, set: function(_){valuePadding=_;}},
+        minBarWidth:  {get: function(){return minBarWidth;}, set: function(_){minBarWidth=_;}},
 
         // options that require extra logic in the setter
         margin: {get: function(){return margin;}, set: function(_){
@@ -7805,6 +7809,7 @@ nv.models.multiChart = function() {
         x,
         y,
         noData = 'No Data Available.',
+        minBarHeight = 1,
         yDomain1,
         yDomain2,
         getX = function(d) { return d.x },
@@ -7958,10 +7963,12 @@ nv.models.multiChart = function() {
             bars1
                 .width(availableWidth)
                 .height(availableHeight)
+                .minBarHeight(minBarHeight)
                 .color(color_array.filter(function(d,i) { return !data[i].disabled && data[i].yAxis == 1 && data[i].type == 'bar'}));
             bars2
                 .width(availableWidth)
                 .height(availableHeight)
+                .minBarHeight(minBarHeight)
                 .color(color_array.filter(function(d,i) { return !data[i].disabled && data[i].yAxis == 2 && data[i].type == 'bar'}));
             stack1
                 .width(availableWidth)
@@ -8188,14 +8195,15 @@ nv.models.multiChart = function() {
 
     chart._options = Object.create({}, {
         // simple options, just get/set the necessary values
-        width:      {get: function(){return width;}, set: function(_){width=_;}},
-        height:     {get: function(){return height;}, set: function(_){height=_;}},
-        showLegend: {get: function(){return showLegend;}, set: function(_){showLegend=_;}},
-        yDomain1:      {get: function(){return yDomain1;}, set: function(_){yDomain1=_;}},
-        yDomain2:    {get: function(){return yDomain2;}, set: function(_){yDomain2=_;}},
-        tooltips:    {get: function(){return tooltips;}, set: function(_){tooltips=_;}},
-        tooltipContent:    {get: function(){return tooltip;}, set: function(_){tooltip=_;}},
-        noData:    {get: function(){return noData;}, set: function(_){noData=_;}},
+        width:          {get: function(){return width;}, set: function(_){width=_;}},
+        height:         {get: function(){return height;}, set: function(_){height=_;}},
+        showLegend:     {get: function(){return showLegend;}, set: function(_){showLegend=_;}},
+        yDomain1:       {get: function(){return yDomain1;}, set: function(_){yDomain1=_;}},
+        yDomain2:       {get: function(){return yDomain2;}, set: function(_){yDomain2=_;}},
+        tooltips:       {get: function(){return tooltips;}, set: function(_){tooltips=_;}},
+        tooltipContent: {get: function(){return tooltip;}, set: function(_){tooltip=_;}},
+        noData:         {get: function(){return noData;}, set: function(_){noData=_;}},
+        minBarHeight:   {get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
         interpolate:    {get: function(){return interpolate;}, set: function(_){interpolate=_;}},
 
         // options that require extra logic in the setter
