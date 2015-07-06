@@ -12,7 +12,7 @@ nv.models.axis = function() {
         , width = 75 //only used for tickLabel currently
         , height = 60 //only used for tickLabel currently
         , axisLabelText = null
-        , showMaxMin = true //TODO: showMaxMin should be disabled on all ordinal scaled axes
+        , showMaxMin = {max: true, min: true} //TODO: showMaxMin should be disabled on all ordinal scaled axes
         , highlightZero = true
         , rotateLabels = 0
         , rotateYLabel = true
@@ -84,7 +84,7 @@ nv.models.axis = function() {
                         .attr('text-anchor', 'middle')
                         .attr('y', 0)
                         .attr('x', w/2);
-                    if (showMaxMin) {
+                    if (showMaxMin.max || showMaxMin.min) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             .data(scale.domain());
                         axisMaxMin.enter().append('g').attr('class', 'nv-axisMaxMin').append('text');
@@ -105,6 +105,9 @@ nv.models.axis = function() {
                             .attr('transform', function(d,i) {
                                 return 'translate(' + nv.utils.NaNtoZero(scale.range()[i]) + ',0)'
                             });
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     break;
                 case 'bottom':
@@ -138,8 +141,8 @@ nv.models.axis = function() {
                         .attr('text-anchor', 'middle')
                         .attr('y', xLabelMargin)
                         .attr('x', w/2);
-                    if (showMaxMin) {
-                        //if (showMaxMin && !isOrdinal) {
+                    if (showMaxMin.max || showMaxMin.min) {
+                        //if ((showMaxMin.max || showMaxMin.min) && !isOrdinal) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             //.data(scale.domain())
                             .data([scale.domain()[0], scale.domain()[scale.domain().length - 1]]);
@@ -162,6 +165,9 @@ nv.models.axis = function() {
                             .attr('transform', function(d,i) {
                                 return 'translate(' + nv.utils.NaNtoZero((scale(d) + (isOrdinal ? scale.rangeBand() / 2 : 0))) + ',0)'
                             });
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     if (staggerLabels)
                         xTicks
@@ -177,7 +183,7 @@ nv.models.axis = function() {
                         .attr('transform', rotateYLabel ? 'rotate(90)' : '')
                         .attr('y', rotateYLabel ? (-Math.max(margin.right,width) + 12) : -10) //TODO: consider calculating this based on largest tick width... OR at least expose this on chart
                         .attr('x', rotateYLabel ? (scale.range()[0] / 2) : axis.tickPadding());
-                    if (showMaxMin) {
+                    if (showMaxMin.max || showMaxMin.min) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             .data(scale.domain());
                         axisMaxMin.enter().append('g').attr('class', 'nv-axisMaxMin').append('text')
@@ -202,6 +208,9 @@ nv.models.axis = function() {
                             })
                             .select('text')
                             .style('opacity', 1);
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     break;
                 case 'left':
@@ -219,7 +228,7 @@ nv.models.axis = function() {
                         .attr('transform', rotateYLabel ? 'rotate(-90)' : '')
                         .attr('y', rotateYLabel ? (-Math.max(margin.left,width) + 25 - (axisLabelDistance || 0)) : -10)
                         .attr('x', rotateYLabel ? (-scale.range()[0] / 2) : -axis.tickPadding());
-                    if (showMaxMin) {
+                    if (showMaxMin.max || showMaxMin.min) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             .data(scale.domain());
                         axisMaxMin.enter().append('g').attr('class', 'nv-axisMaxMin').append('text')
@@ -244,12 +253,15 @@ nv.models.axis = function() {
                             })
                             .select('text')
                             .style('opacity', 1);
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     break;
             }
             axisLabel.text(function(d) { return d });
 
-            if (showMaxMin && (axis.orient() === 'left' || axis.orient() === 'right')) {
+            if ((showMaxMin.max || showMaxMin.min) && (axis.orient() === 'left' || axis.orient() === 'right')) {
                 //check if max and min overlap other values, if so, hide the values that overlap
                 g.selectAll('g') // the g's wrapping each tick
                     .each(function(d,i) {
@@ -259,6 +271,12 @@ nv.models.axis = function() {
                                 d3.select(this).attr('opacity', 0);
 
                             d3.select(this).select('text').attr('opacity', 0); // Don't remove the ZERO line!!
+                        }
+                        if (!showMaxMin.max && scale(d) >= scale.range()[0] - 10) {
+                            d3.select(this).style('opacity', 0); // Hide both text and line
+                        }
+                        if (!showMaxMin.min && scale(d) <= scale.range()[0] + 10) {
+                            d3.select(this).select('text').style('opacity', 0); // Hide the text, not the line
                         }
                     });
 
@@ -270,7 +288,7 @@ nv.models.axis = function() {
                 }
             }
 
-            if (showMaxMin && (axis.orient() === 'top' || axis.orient() === 'bottom')) {
+            if ((showMaxMin.max || showMaxMin.min) && (axis.orient() === 'top' || axis.orient() === 'bottom')) {
                 var maxMinRange = [];
                 wrap.selectAll('g.nv-axisMaxMin')
                     .each(function(d,i) {
@@ -293,6 +311,12 @@ nv.models.axis = function() {
                             d3.select(this).remove();
                         else
                             d3.select(this).select('text').remove(); // Don't remove the ZERO line!!
+                    }
+                    if (scale(d) >= maxMinRange[1] && !showMaxMin.max) {
+                        d3.select(this).remove(); // Hide text and line
+                    }
+                    if (scale(d) <= maxMinRange[0] && !showMaxMin.min) {
+                        d3.select(this).select('text').remove(); // Hide text only
                     }
                 });
             }
@@ -330,11 +354,16 @@ nv.models.axis = function() {
         rotateLabels:      {get: function(){return rotateLabels;}, set: function(_){rotateLabels=_;}},
         rotateYLabel:      {get: function(){return rotateYLabel;}, set: function(_){rotateYLabel=_;}},
         highlightZero:     {get: function(){return highlightZero;}, set: function(_){highlightZero=_;}},
-        showMaxMin:        {get: function(){return showMaxMin;}, set: function(_){showMaxMin=_;}},
         axisLabel:         {get: function(){return axisLabelText;}, set: function(_){axisLabelText=_;}},
         height:            {get: function(){return height;}, set: function(_){height=_;}},
         ticks:             {get: function(){return ticks;}, set: function(_){ticks=_;}},
         width:             {get: function(){return width;}, set: function(_){width=_;}},
+
+        // seperate max min switch
+        showMaxMin: {get: function(){return showMaxMin;}, set: function(_){
+            showMaxMin.max = _.max !== undefined ? _.max : _;
+            showMaxMin.min = _.min !== undefined ? _.min : _;
+        }},
 
         // options that require extra logic in the setter
         margin: {get: function(){return margin;}, set: function(_){
