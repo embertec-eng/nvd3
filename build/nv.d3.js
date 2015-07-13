@@ -1,4 +1,4 @@
-/* nvd3 version 1.7.1(https://github.com/novus/nvd3) 2015-06-16 */
+/* nvd3 version 1.7.1(https://github.com/novus/nvd3) 2015-07-13 */
 (function(){
 
 // set up main nv object on window
@@ -1461,7 +1461,7 @@ nv.utils.initSVG = function(svg) {
         , width = 75 //only used for tickLabel currently
         , height = 60 //only used for tickLabel currently
         , axisLabelText = null
-        , showMaxMin = true //TODO: showMaxMin should be disabled on all ordinal scaled axes
+        , showMaxMin = {max: true, min: true} //TODO: showMaxMin should be disabled on all ordinal scaled axes
         , highlightZero = true
         , rotateLabels = 0
         , rotateYLabel = true
@@ -1533,7 +1533,7 @@ nv.utils.initSVG = function(svg) {
                         .attr('text-anchor', 'middle')
                         .attr('y', 0)
                         .attr('x', w/2);
-                    if (showMaxMin) {
+                    if (showMaxMin.max || showMaxMin.min) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             .data(scale.domain());
                         axisMaxMin.enter().append('g').attr('class', 'nv-axisMaxMin').append('text');
@@ -1554,6 +1554,9 @@ nv.utils.initSVG = function(svg) {
                             .attr('transform', function(d,i) {
                                 return 'translate(' + nv.utils.NaNtoZero(scale.range()[i]) + ',0)'
                             });
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     break;
                 case 'bottom':
@@ -1587,8 +1590,8 @@ nv.utils.initSVG = function(svg) {
                         .attr('text-anchor', 'middle')
                         .attr('y', xLabelMargin)
                         .attr('x', w/2);
-                    if (showMaxMin) {
-                        //if (showMaxMin && !isOrdinal) {
+                    if (showMaxMin.max || showMaxMin.min) {
+                        //if ((showMaxMin.max || showMaxMin.min) && !isOrdinal) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             //.data(scale.domain())
                             .data([scale.domain()[0], scale.domain()[scale.domain().length - 1]]);
@@ -1611,6 +1614,9 @@ nv.utils.initSVG = function(svg) {
                             .attr('transform', function(d,i) {
                                 return 'translate(' + nv.utils.NaNtoZero((scale(d) + (isOrdinal ? scale.rangeBand() / 2 : 0))) + ',0)'
                             });
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     if (staggerLabels)
                         xTicks
@@ -1626,7 +1632,7 @@ nv.utils.initSVG = function(svg) {
                         .attr('transform', rotateYLabel ? 'rotate(90)' : '')
                         .attr('y', rotateYLabel ? (-Math.max(margin.right,width) + 12) : -10) //TODO: consider calculating this based on largest tick width... OR at least expose this on chart
                         .attr('x', rotateYLabel ? (scale.range()[0] / 2) : axis.tickPadding());
-                    if (showMaxMin) {
+                    if (showMaxMin.max || showMaxMin.min) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             .data(scale.domain());
                         axisMaxMin.enter().append('g').attr('class', 'nv-axisMaxMin').append('text')
@@ -1651,6 +1657,9 @@ nv.utils.initSVG = function(svg) {
                             })
                             .select('text')
                             .style('opacity', 1);
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     break;
                 case 'left':
@@ -1668,7 +1677,7 @@ nv.utils.initSVG = function(svg) {
                         .attr('transform', rotateYLabel ? 'rotate(-90)' : '')
                         .attr('y', rotateYLabel ? (-Math.max(margin.left,width) + 25 - (axisLabelDistance || 0)) : -10)
                         .attr('x', rotateYLabel ? (-scale.range()[0] / 2) : -axis.tickPadding());
-                    if (showMaxMin) {
+                    if (showMaxMin.max || showMaxMin.min) {
                         var axisMaxMin = wrap.selectAll('g.nv-axisMaxMin')
                             .data(scale.domain());
                         axisMaxMin.enter().append('g').attr('class', 'nv-axisMaxMin').append('text')
@@ -1693,12 +1702,15 @@ nv.utils.initSVG = function(svg) {
                             })
                             .select('text')
                             .style('opacity', 1);
+                        axisMaxMin.style('opacity', function(d, i) {
+                            return i ? (showMaxMin.max ? 1 : 0) : (showMaxMin.min ? 1 : 0);
+                        });
                     }
                     break;
             }
             axisLabel.text(function(d) { return d });
 
-            if (showMaxMin && (axis.orient() === 'left' || axis.orient() === 'right')) {
+            if ((showMaxMin.max || showMaxMin.min) && (axis.orient() === 'left' || axis.orient() === 'right')) {
                 //check if max and min overlap other values, if so, hide the values that overlap
                 g.selectAll('g') // the g's wrapping each tick
                     .each(function(d,i) {
@@ -1708,6 +1720,12 @@ nv.utils.initSVG = function(svg) {
                                 d3.select(this).attr('opacity', 0);
 
                             d3.select(this).select('text').attr('opacity', 0); // Don't remove the ZERO line!!
+                        }
+                        if (!showMaxMin.max && scale(d) >= scale.range()[0] - 10) {
+                            d3.select(this).style('opacity', 0); // Hide both text and line
+                        }
+                        if (!showMaxMin.min && scale(d) <= scale.range()[0] + 10) {
+                            d3.select(this).select('text').style('opacity', 0); // Hide the text, not the line
                         }
                     });
 
@@ -1719,7 +1737,7 @@ nv.utils.initSVG = function(svg) {
                 }
             }
 
-            if (showMaxMin && (axis.orient() === 'top' || axis.orient() === 'bottom')) {
+            if ((showMaxMin.max || showMaxMin.min) && (axis.orient() === 'top' || axis.orient() === 'bottom')) {
                 var maxMinRange = [];
                 wrap.selectAll('g.nv-axisMaxMin')
                     .each(function(d,i) {
@@ -1742,6 +1760,12 @@ nv.utils.initSVG = function(svg) {
                             d3.select(this).remove();
                         else
                             d3.select(this).select('text').remove(); // Don't remove the ZERO line!!
+                    }
+                    if (scale(d) >= maxMinRange[1] && !showMaxMin.max) {
+                        d3.select(this).remove(); // Hide text and line
+                    }
+                    if (scale(d) <= maxMinRange[0] && !showMaxMin.min) {
+                        d3.select(this).select('text').remove(); // Hide text only
                     }
                 });
             }
@@ -1779,11 +1803,16 @@ nv.utils.initSVG = function(svg) {
         rotateLabels:      {get: function(){return rotateLabels;}, set: function(_){rotateLabels=_;}},
         rotateYLabel:      {get: function(){return rotateYLabel;}, set: function(_){rotateYLabel=_;}},
         highlightZero:     {get: function(){return highlightZero;}, set: function(_){highlightZero=_;}},
-        showMaxMin:        {get: function(){return showMaxMin;}, set: function(_){showMaxMin=_;}},
         axisLabel:         {get: function(){return axisLabelText;}, set: function(_){axisLabelText=_;}},
         height:            {get: function(){return height;}, set: function(_){height=_;}},
         ticks:             {get: function(){return ticks;}, set: function(_){ticks=_;}},
         width:             {get: function(){return width;}, set: function(_){width=_;}},
+
+        // seperate max min switch
+        showMaxMin: {get: function(){return showMaxMin;}, set: function(_){
+            showMaxMin.max = _.max !== undefined ? _.max : _;
+            showMaxMin.min = _.min !== undefined ? _.min : _;
+        }},
 
         // options that require extra logic in the setter
         margin: {get: function(){return margin;}, set: function(_){
@@ -7810,6 +7839,7 @@ nv.models.multiChart = function() {
         y,
         noData = 'No Data Available.',
         minBarHeight = 1,
+        labelToBar = false,
         yDomain1,
         yDomain2,
         getX = function(d) { return d.x },
@@ -8041,8 +8071,27 @@ nv.models.multiChart = function() {
                 .ticks( nv.utils.calcTicksX(availableWidth/100, data) )
                 .tickSize(-availableHeight, 0);
 
+            if (labelToBar && (dataBars1.length || dataBars2.length)) {
+                var ltbOffset = 0;
+                if (dataBars1.length && dataBars2.length && dataBars1[0].values.length === dataBars2[0].values.length) {
+                    ltbOffset = Math.min(bars1.margin().left, bars2.margin().left) / 2;
+                }
+                var ltbBar = dataBars1.length ? bars1 : bars2;
+                var ltbDataBar = dataBars1.length ? dataBars1 : dataBars2;
+                var ltbBarX = ltbBar.xScale();
+                var ltbBarGetX = ltbBar.x();
+                var cDomain = ltbDataBar[0].values.map(function(d, i) {
+                    return ltbBarGetX(d, i);
+                });
+                var cRange = ltbDataBar[0].values.map(function(d, i) {
+                    return nv.utils.NaNtoZero(ltbBarX.rangeBand()) / 2 + nv.utils.NaNtoZero(ltbBarX(ltbBarGetX(d, i))) + ltbOffset;
+                });
+                xAxis.scale(d3.scale.ordinal().domain(cDomain).range(cRange));
+            }
+
             g.select('.x.axis')
                 .attr('transform', 'translate(0,' + availableHeight + ')');
+
             d3.transition(g.select('.x.axis'))
                 .call(xAxis);
 
@@ -8204,6 +8253,7 @@ nv.models.multiChart = function() {
         tooltipContent: {get: function(){return tooltip;}, set: function(_){tooltip=_;}},
         noData:         {get: function(){return noData;}, set: function(_){noData=_;}},
         minBarHeight:   {get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
+        labelToBar:     {get: function(){return labelToBar;}, set: function(_){labelToBar=_;}},
         interpolate:    {get: function(){return interpolate;}, set: function(_){interpolate=_;}},
 
         // options that require extra logic in the setter
