@@ -383,24 +383,6 @@ nv.models.multiChart = function() {
         dispatch.tooltipHide(e);
     });
 
-    lines1.dispatch.on('elementMouseover.tooltip', function(e) {
-        e.pos = [e.pos[0] +  margin.left, e.pos[1] + margin.top];
-        dispatch.tooltipShow(e);
-    });
-
-    lines1.dispatch.on('elementMouseout.tooltip', function(e) {
-        dispatch.tooltipHide(e);
-    });
-
-    lines2.dispatch.on('elementMouseover.tooltip', function(e) {
-        e.pos = [e.pos[0] +  margin.left, e.pos[1] + margin.top];
-        dispatch.tooltipShow(e);
-    });
-
-    lines2.dispatch.on('elementMouseout.tooltip', function(e) {
-        dispatch.tooltipHide(e);
-    });
-
     dispatch.on('tooltipHide', function() {
         if (tooltips) nv.tooltip.cleanup();
     });
