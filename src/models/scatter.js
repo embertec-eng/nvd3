@@ -208,7 +208,10 @@ nv.models.scatter = function() {
                         })
                         .attr("id", function(d,i) {
                             return "nv-path-"+i; })
-                        .attr("clip-path", function(d,i) { return "url(#nv-clip-"+i+")"; })
+                        // Non-chrome browsers have problem with multiChart with
+                        // same clip-path ids. Use the chart id to make it
+                        // unique.
+                        .attr("clip-path", function(d,i) { return "url(#nv-clip-"+chart.id()+"-"+i+")"; })
                         ;
                         // chain these to above to see the voronoi elements (good for debugging)
                         //.style("fill", d3.rgb(230, 230, 230))
@@ -227,7 +230,10 @@ nv.models.scatter = function() {
                         clips.selectAll("clipPath")
                             .data(vertices)
                             .enter().append("svg:clipPath")
-                            .attr("id", function(d, i) { return "nv-clip-"+i;})
+                            // Non-chrome browsers have problem with multiChart with
+                            // same clip-path ids. Use the chart id to make it
+                            // unique.
+                            .attr("id", function(d, i) { return "nv-clip-"+chart.id()+"-"+i;})
                             .append("svg:circle")
                             .attr('cx', function(d) { return d[0]; })
                             .attr('cy', function(d) { return d[1]; })
