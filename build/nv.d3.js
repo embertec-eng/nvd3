@@ -1,4 +1,4 @@
-/* nvd3 version 1.7.1(https://github.com/novus/nvd3) 2015-07-13 */
+/* nvd3 version 1.7.1(https://github.com/novus/nvd3) 2015-07-22 */
 (function(){
 
 // set up main nv object on window
@@ -8203,24 +8203,6 @@ nv.models.multiChart = function() {
         dispatch.tooltipHide(e);
     });
 
-    lines1.dispatch.on('elementMouseover.tooltip', function(e) {
-        e.pos = [e.pos[0] +  margin.left, e.pos[1] + margin.top];
-        dispatch.tooltipShow(e);
-    });
-
-    lines1.dispatch.on('elementMouseout.tooltip', function(e) {
-        dispatch.tooltipHide(e);
-    });
-
-    lines2.dispatch.on('elementMouseover.tooltip', function(e) {
-        e.pos = [e.pos[0] +  margin.left, e.pos[1] + margin.top];
-        dispatch.tooltipShow(e);
-    });
-
-    lines2.dispatch.on('elementMouseout.tooltip', function(e) {
-        dispatch.tooltipHide(e);
-    });
-
     dispatch.on('tooltipHide', function() {
         if (tooltips) nv.tooltip.cleanup();
     });
@@ -9452,8 +9434,8 @@ nv.models.scatter = function() {
                                 var pX = getX(point,pointIndex);
                                 var pY = getY(point,pointIndex);
 
-                                return [x(pX)+ Math.random() * 1e-7,
-                                        y(pY)+ Math.random() * 1e-7,
+                                return [x(pX)+ pointIndex * 1e-7, // cheaper uniq noise values than Math.ramdom
+                                        y(pY)+ pointIndex * 1e-7,
                                     groupIndex,
                                     pointIndex, point]; //temp hack to add noise untill I think of a better way so there are no duplicates
                             })
@@ -9504,7 +9486,10 @@ nv.models.scatter = function() {
                         })
                         .attr("id", function(d,i) {
                             return "nv-path-"+i; })
-                        .attr("clip-path", function(d,i) { return "url(#nv-clip-"+i+")"; })
+                        // Non-chrome browsers have problem with multiChart with
+                        // same clip-path ids. Use the chart id to make it
+                        // unique.
+                        .attr("clip-path", function(d,i) { return "url(#nv-clip-"+chart.id()+"-"+i+")"; })
                         ;
                         // chain these to above to see the voronoi elements (good for debugging)
                         //.style("fill", d3.rgb(230, 230, 230))
@@ -9515,11 +9500,18 @@ nv.models.scatter = function() {
                     if (clipVoronoi) {
                         // voronoi sections are already set to clip,
                         // just create the circles with the IDs they expect
+
+                        // Non-chrome browsers cannot cope well with multiple
+                        // redefined clip paths.
+                        wrap.selectAll("#nv-point-clips").remove();
                         var clips = wrap.append("svg:g").attr("id", "nv-point-clips");
                         clips.selectAll("clipPath")
                             .data(vertices)
                             .enter().append("svg:clipPath")
-                            .attr("id", function(d, i) { return "nv-clip-"+i;})
+                            // Non-chrome browsers have problem with multiChart with
+                            // same clip-path ids. Use the chart id to make it
+                            // unique.
+                            .attr("id", function(d, i) { return "nv-clip-"+chart.id()+"-"+i;})
                             .append("svg:circle")
                             .attr('cx', function(d) { return d[0]; })
                             .attr('cy', function(d) { return d[1]; })

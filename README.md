@@ -6,6 +6,10 @@ Original licenses apply.
 
 ---
 # Changes:
+**v1.7.1.4**
+
+* Fixed the voronoi bug on non-chrome browsers
+
 **v1.7.1.3**
 
 * Added an option to align x labels to bars in multiChart
