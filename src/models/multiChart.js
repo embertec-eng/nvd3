@@ -19,6 +19,7 @@ nv.models.multiChart = function() {
         y,
         noData = 'No Data Available.',
         minBarHeight = 1,
+        labelToBar = false,
         yDomain1,
         yDomain2,
         getX = function(d) { return d.x },
@@ -250,8 +251,27 @@ nv.models.multiChart = function() {
                 .ticks( nv.utils.calcTicksX(availableWidth/100, data) )
                 .tickSize(-availableHeight, 0);
 
+            if (labelToBar && (dataBars1.length || dataBars2.length)) {
+                var ltbOffset = 0;
+                if (dataBars1.length && dataBars2.length && dataBars1[0].values.length === dataBars2[0].values.length) {
+                    ltbOffset = Math.min(bars1.margin().left, bars2.margin().left) / 2;
+                }
+                var ltbBar = dataBars1.length ? bars1 : bars2;
+                var ltbDataBar = dataBars1.length ? dataBars1 : dataBars2;
+                var ltbBarX = ltbBar.xScale();
+                var ltbBarGetX = ltbBar.x();
+                var cDomain = ltbDataBar[0].values.map(function(d, i) {
+                    return ltbBarGetX(d, i);
+                });
+                var cRange = ltbDataBar[0].values.map(function(d, i) {
+                    return nv.utils.NaNtoZero(ltbBarX.rangeBand()) / 2 + nv.utils.NaNtoZero(ltbBarX(ltbBarGetX(d, i))) + ltbOffset;
+                });
+                xAxis.scale(d3.scale.ordinal().domain(cDomain).range(cRange));
+            }
+
             g.select('.x.axis')
                 .attr('transform', 'translate(0,' + availableHeight + ')');
+
             d3.transition(g.select('.x.axis'))
                 .call(xAxis);
 
@@ -363,24 +383,6 @@ nv.models.multiChart = function() {
         dispatch.tooltipHide(e);
     });
 
-    lines1.dispatch.on('elementMouseover.tooltip', function(e) {
-        e.pos = [e.pos[0] +  margin.left, e.pos[1] + margin.top];
-        dispatch.tooltipShow(e);
-    });
-
-    lines1.dispatch.on('elementMouseout.tooltip', function(e) {
-        dispatch.tooltipHide(e);
-    });
-
-    lines2.dispatch.on('elementMouseover.tooltip', function(e) {
-        e.pos = [e.pos[0] +  margin.left, e.pos[1] + margin.top];
-        dispatch.tooltipShow(e);
-    });
-
-    lines2.dispatch.on('elementMouseout.tooltip', function(e) {
-        dispatch.tooltipHide(e);
-    });
-
     dispatch.on('tooltipHide', function() {
         if (tooltips) nv.tooltip.cleanup();
     });
@@ -413,6 +415,7 @@ nv.models.multiChart = function() {
         tooltipContent: {get: function(){return tooltip;}, set: function(_){tooltip=_;}},
         noData:         {get: function(){return noData;}, set: function(_){noData=_;}},
         minBarHeight:   {get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
+        labelToBar:     {get: function(){return labelToBar;}, set: function(_){labelToBar=_;}},
         interpolate:    {get: function(){return interpolate;}, set: function(_){interpolate=_;}},
 
         // options that require extra logic in the setter
