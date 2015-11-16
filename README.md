@@ -6,6 +6,10 @@ Original licenses apply.
 
 ---
 # Changes:
+v1.8.1
+
+* Synced with official repo
+
 **v1.7.1.4**
 
 * Fixed the voronoi bug on non-chrome browsers
