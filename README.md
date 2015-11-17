@@ -6,6 +6,9 @@ Original licenses apply.
 
 ---
 # Changes:
+v1.8.1.1
+* Tag our own version
+
 v1.8.1
 
 * Synced with official repo
