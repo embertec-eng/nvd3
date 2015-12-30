@@ -175,6 +175,22 @@ nv.models.scatter = function() {
                     );
 
                     if (vertices.length == 0) return false;  // No active points, we're done
+                    // dedup, because d3.geom.voronoi will crash on duplicated points
+                    // slightly revised after this: https://github.com/novus/nvd3/pull/448/files
+                    var d3_episilon = 1e-6;
+                    vertices = vertices.sort(function(a, b) {
+                        return ((a[0] - b[0]) || (a[1] - b[1]));
+                    });
+                    var d3_dedup = 0;
+                    while (d3_dedup < vertices.length) {
+                        if ((Math.abs(vertices[d3_deup][0] - vertices[d3_deup+1][0]) < d3_episilon) &&
+                            (Math.abs(vertices[d3_deup][1] - vertices[d3_deup+1][1]) < d3_episilon)) {
+                            vertices.splice(d3_dedup+1, 1);
+                        } else {
+                            d3_dedup += 1;
+                        }
+                    }
+
                     if (vertices.length < 3) {
                         // Issue #283 - Adding 2 dummy points to the voronoi b/c voronoi requires min 3 points to work
                         vertices.push([x.range()[0] - 20, y.range()[0] - 20, null, null]);
