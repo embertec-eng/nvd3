@@ -182,7 +182,7 @@ nv.models.scatter = function() {
                         return ((a[0] - b[0]) || (a[1] - b[1]));
                     });
                     var d3_dedup = 0;
-                    while (d3_dedup < vertices.length) {
+                    while (d3_dedup < vertices.length - 1) {
                         if ((Math.abs(vertices[d3_dedup][0] - vertices[d3_dedup+1][0]) < d3_episilon) &&
                             (Math.abs(vertices[d3_dedup][1] - vertices[d3_dedup+1][1]) < d3_episilon)) {
                             vertices.splice(d3_dedup+1, 1);
