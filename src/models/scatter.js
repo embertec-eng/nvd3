@@ -183,8 +183,8 @@ nv.models.scatter = function() {
                     });
                     var d3_dedup = 0;
                     while (d3_dedup < vertices.length) {
-                        if ((Math.abs(vertices[d3_deup][0] - vertices[d3_deup+1][0]) < d3_episilon) &&
-                            (Math.abs(vertices[d3_deup][1] - vertices[d3_deup+1][1]) < d3_episilon)) {
+                        if ((Math.abs(vertices[d3_dedup][0] - vertices[d3_dedup+1][0]) < d3_episilon) &&
+                            (Math.abs(vertices[d3_dedup][1] - vertices[d3_dedup+1][1]) < d3_episilon)) {
                             vertices.splice(d3_dedup+1, 1);
                         } else {
                             d3_dedup += 1;
