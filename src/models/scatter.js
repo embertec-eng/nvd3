@@ -208,7 +208,10 @@ nv.models.scatter = function() {
                         [width + 10,-10]
                     ]);
 
-                    var voronoi = d3.geom.voronoi(vertices).map(function(d, i) {
+                    // add clipExtent to avoid huge default bbox which sometimes
+                    // causes errors
+                    var clippedVoronoi = d3.geom.voronoi().clipExtent([[-10, -10], [width + 10, height + 10]]);
+                    var voronoi = clippedVoronoi(vertices).map(function(d, i) {
                         return {
                             'data': bounds.clip(d),
                             'series': vertices[i][2],
