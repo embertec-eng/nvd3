@@ -6,7 +6,7 @@ Original licenses apply.
 
 ---
 # Changes:
-v1.8.1.2
+v1.8.1.5
 
 * add voronoi clipExtent
 
