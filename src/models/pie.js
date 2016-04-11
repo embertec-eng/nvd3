@@ -339,7 +339,7 @@ nv.models.pie = function() {
                 var i = d3.interpolate(this._current, a);
                 this._current = i(0);
                 return function (t) {
-                    return arcs[idx](i(t));
+                    return arcs[idx] ? arcs[idx](i(t)) : undefined;
                 };
             }
         });
