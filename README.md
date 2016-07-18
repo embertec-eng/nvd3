@@ -6,9 +6,12 @@ Original licenses apply.
 
 ---
 # Changes:
-v1.8.1.7
+v1.8.1.8
 
 * Add grow on click to pie model
+
+v1.8.1.7
+
 * Line rendering fix
 * Fix mouseout so the hover class is removed from horizontal bar charts
 
