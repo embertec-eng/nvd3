@@ -6,6 +6,18 @@ Original licenses apply.
 
 ---
 # Changes:
+v1.8.1.6
+
+* fix crash when updating a pie chart whilst it is tweening
+
+v1.8.1.5
+
+* add voronoi clipExtent
+
+v1.8.1.1
+
+* Tag our own version
+
 v1.8.1
 
 * Synced with official repo
