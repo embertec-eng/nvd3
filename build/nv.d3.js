@@ -1,4 +1,4 @@
-/* nvd3 version 1.8.1 (https://github.com/novus/nvd3) 2015-11-16 */
+/* nvd3 version 1.8.1 (https://github.com/novus/nvd3) 2016-07-18 */
 (function(){
 
 // set up main nv object
@@ -8654,13 +8654,6 @@ nv.models.multiBarHorizontal = function() {
                         color: d3.select(this).style("fill")
                     });
                 })
-                .on('mouseout', function(d,i) {
-                    dispatch.elementMouseout({
-                        data: d,
-                        index: i,
-                        color: d3.select(this).style("fill")
-                    });
-                })
                 .on('mousemove', function(d,i) {
                     dispatch.elementMousemove({
                         data: d,
@@ -9325,12 +9318,12 @@ nv.models.multiChart = function() {
             gEnter.append('g').attr('class', 'nv-x nv-axis');
             gEnter.append('g').attr('class', 'nv-y1 nv-axis');
             gEnter.append('g').attr('class', 'nv-y2 nv-axis');
-            gEnter.append('g').attr('class', 'lines1Wrap');
-            gEnter.append('g').attr('class', 'lines2Wrap');
             gEnter.append('g').attr('class', 'bars1Wrap');
             gEnter.append('g').attr('class', 'bars2Wrap');
             gEnter.append('g').attr('class', 'stack1Wrap');
             gEnter.append('g').attr('class', 'stack2Wrap');
+            gEnter.append('g').attr('class', 'lines1Wrap');
+            gEnter.append('g').attr('class', 'lines2Wrap');
             gEnter.append('g').attr('class', 'legendWrap');
 
             var g = wrap.select('g');
@@ -10237,6 +10230,7 @@ nv.models.pie = function() {
         , donut = false
         , title = false
         , growOnHover = true
+        , growOnClick = false
         , titleOffset = 0
         , labelSunbeamLayout = false
         , startAngle = false
@@ -10393,6 +10387,18 @@ nv.models.pie = function() {
                 dispatch.elementMousemove({data: d.data, index: i});
             });
             ae.on('click', function(d, i) {
+                d3.select(this.parentNode).selectAll(".nv-slice").each(function() {
+                    d3.select(this).select("path")
+                        .transition()
+                        .duration(50)
+                        .attr("d", arcs[i]);
+                });
+                if (growOnClick) {
+                    d3.select(this).select("path")
+                        .transition()
+                        .duration(70)
+                        .attr("d", arcsOver[i]);
+                }
                 dispatch.elementClick({
                     data: d.data,
                     index: i,
@@ -10555,7 +10561,7 @@ nv.models.pie = function() {
                 var i = d3.interpolate(this._current, a);
                 this._current = i(0);
                 return function (t) {
-                    return arcs[idx](i(t));
+                    return arcs[idx] ? arcs[idx](i(t)) : undefined;
                 };
             }
         });
@@ -10592,6 +10598,7 @@ nv.models.pie = function() {
         labelSunbeamLayout: {get: function(){return labelSunbeamLayout;}, set: function(_){labelSunbeamLayout=_;}},
         donut:              {get: function(){return donut;}, set: function(_){donut=_;}},
         growOnHover:        {get: function(){return growOnHover;}, set: function(_){growOnHover=_;}},
+        growOnClick:        {get: function(){return growOnClick;}, set: function(_){growOnClick=_;}},
 
         // depreciated after 1.7.1
         pieLabelsOutside: {get: function(){return labelsOutside;}, set: function(_){
@@ -11054,6 +11061,22 @@ nv.models.scatter = function() {
                     );
 
                     if (vertices.length == 0) return false;  // No active points, we're done
+                    // dedup, because d3.geom.voronoi will crash on duplicated points
+                    // slightly revised after this: https://github.com/novus/nvd3/pull/448/files
+                    var d3_episilon = 1e-6;
+                    vertices = vertices.sort(function(a, b) {
+                        return ((a[0] - b[0]) || (a[1] - b[1]));
+                    });
+                    var d3_dedup = 0;
+                    while (d3_dedup < vertices.length - 1) {
+                        if ((Math.abs(vertices[d3_dedup][0] - vertices[d3_dedup+1][0]) < d3_episilon) &&
+                            (Math.abs(vertices[d3_dedup][1] - vertices[d3_dedup+1][1]) < d3_episilon)) {
+                            vertices.splice(d3_dedup+1, 1);
+                        } else {
+                            d3_dedup += 1;
+                        }
+                    }
+
                     if (vertices.length < 3) {
                         // Issue #283 - Adding 2 dummy points to the voronoi b/c voronoi requires min 3 points to work
                         vertices.push([x.range()[0] - 20, y.range()[0] - 20, null, null]);
@@ -11071,7 +11094,10 @@ nv.models.scatter = function() {
                         [width + 10,-10]
                     ]);
 
-                    var voronoi = d3.geom.voronoi(vertices).map(function(d, i) {
+                    // add clipExtent to avoid huge default bbox which sometimes
+                    // causes errors
+                    var clippedVoronoi = d3.geom.voronoi().clipExtent([[-10, -10], [width + 10, height + 10]]);
+                    var voronoi = clippedVoronoi(vertices).map(function(d, i) {
                         return {
                             'data': bounds.clip(d),
                             'series': vertices[i][2],

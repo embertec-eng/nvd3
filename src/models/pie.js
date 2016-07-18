@@ -21,6 +21,7 @@ nv.models.pie = function() {
         , donut = false
         , title = false
         , growOnHover = true
+        , growOnClick = false
         , titleOffset = 0
         , labelSunbeamLayout = false
         , startAngle = false
@@ -177,6 +178,18 @@ nv.models.pie = function() {
                 dispatch.elementMousemove({data: d.data, index: i});
             });
             ae.on('click', function(d, i) {
+                d3.select(this.parentNode).selectAll(".nv-slice").each(function() {
+                    d3.select(this).select("path")
+                        .transition()
+                        .duration(50)
+                        .attr("d", arcs[i]);
+                });
+                if (growOnClick) {
+                    d3.select(this).select("path")
+                        .transition()
+                        .duration(70)
+                        .attr("d", arcsOver[i]);
+                }
                 dispatch.elementClick({
                     data: d.data,
                     index: i,
@@ -376,6 +389,7 @@ nv.models.pie = function() {
         labelSunbeamLayout: {get: function(){return labelSunbeamLayout;}, set: function(_){labelSunbeamLayout=_;}},
         donut:              {get: function(){return donut;}, set: function(_){donut=_;}},
         growOnHover:        {get: function(){return growOnHover;}, set: function(_){growOnHover=_;}},
+        growOnClick:        {get: function(){return growOnClick;}, set: function(_){growOnClick=_;}},
 
         // depreciated after 1.7.1
         pieLabelsOutside: {get: function(){return labelsOutside;}, set: function(_){
