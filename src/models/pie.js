@@ -178,18 +178,12 @@ nv.models.pie = function() {
                 dispatch.elementMousemove({data: d.data, index: i});
             });
             ae.on('click', function(d, i) {
-                d3.select(this.parentNode).selectAll(".nv-slice").each(function() {
-                    d3.select(this).select("path")
-                        .transition()
-                        .duration(50)
-                        .attr("d", arcs[i]);
-                });
-                if (growOnClick) {
+                d3.select(this.parentNode).selectAll(".nv-slice").each(function(d, j) {
                     d3.select(this).select("path")
                         .transition()
                         .duration(70)
-                        .attr("d", arcsOver[i]);
-                }
+                        .attr("d", growOnClick && i === j ? arcsOver[i] : arcs[i]);
+                });
                 dispatch.elementClick({
                     data: d.data,
                     index: i,
