@@ -6,6 +6,14 @@ Original licenses apply.
 
 ---
 # Changes:
+v1.8.1.10
+
+* Support slice shrink when clicked on a grown slice
+
+v1.8.1.9
+
+* Better grow on click transition
+
 v1.8.1.8
 
 * Add grow on click to pie model
