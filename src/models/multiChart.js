@@ -11,7 +11,6 @@ nv.models.multiChart = function() {
         height = null,
         showLegend = true,
         minBarHeight = 1,
-        labelToBar = false,
         noData = null,
         yDomain1,
         yDomain2,
@@ -212,24 +211,6 @@ nv.models.multiChart = function() {
                 ._ticks( nv.utils.calcTicksX(availableWidth/100, data) )
                 .tickSize(-availableHeight, 0);
 
-            if (labelToBar && (dataBars1.length || dataBars2.length)) {
-                var ltbOffset = 0;
-                if (dataBars1.length && dataBars2.length && dataBars1[0].values.length === dataBars2[0].values.length) {
-                    ltbOffset = Math.min(bars1.margin().left, bars2.margin().left) / 2;
-                }
-                var ltbBar = dataBars1.length ? bars1 : bars2;
-                var ltbDataBar = dataBars1.length ? dataBars1 : dataBars2;
-                var ltbBarX = ltbBar.xScale();
-                var ltbBarGetX = ltbBar.x();
-                var cDomain = ltbDataBar[0].values.map(function(d, i) {
-                    return ltbBarGetX(d, i);
-                });
-                var cRange = ltbDataBar[0].values.map(function(d, i) {
-                    return nv.utils.NaNtoZero(ltbBarX.rangeBand()) / 2 + nv.utils.NaNtoZero(ltbBarX(ltbBarGetX(d, i))) + ltbOffset;
-                });
-                xAxis.scale(d3.scale.ordinal().domain(cDomain).range(cRange));
-            }
-
             g.select('.nv-x.nv-axis')
                 .attr('transform', 'translate(0,' + availableHeight + ')');
             d3.transition(g.select('.nv-x.nv-axis'))
@@ -374,7 +355,6 @@ nv.models.multiChart = function() {
     chart._options = Object.create({}, {
         // simple options, just get/set the necessary values
         minBarHeight:   {get: function(){return minBarHeight;}, set: function(_){minBarHeight=_;}},
-        labelToBar:     {get: function(){return labelToBar;}, set: function(_){labelToBar=_;}},
         width:      {get: function(){return width;}, set: function(_){width=_;}},
         height:     {get: function(){return height;}, set: function(_){height=_;}},
         showLegend: {get: function(){return showLegend;}, set: function(_){showLegend=_;}},
