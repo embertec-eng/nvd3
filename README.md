@@ -6,6 +6,10 @@ Original licenses apply.
 
 ---
 # Changes:
+v1.8.1.11
+
+* Remove buggy labelToBar option for multiChart
+
 v1.8.1.10
 
 * Support slice shrink when clicked on a grown slice
